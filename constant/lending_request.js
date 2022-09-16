@@ -1,0 +1,16 @@
+const LENDING_TYPE = {
+    BASIC:1,
+    MULTIPLE_INVESTER:2,
+    MULTIPLE_MONEY:3
+}
+const LENDING_STATUS = {
+    CANCEL:0,
+    OPEN:1,
+    INPROGESS:2,
+    FINISH:3,
+    WAIT_PAYMENT:4,
+    LATE_PAYMENT:5,
+    DEBT:6
+}
+module.exports.LENDING_TYPE = LENDING_TYPE;
+module.exports.LENDING_STATUS = LENDING_STATUS;

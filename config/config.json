@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "p2plendingdb",
+    "database": "p2plending",
+    "host": "p2plendingdb.clyxhhtgnbz9.us-east-1.rds.amazonaws.com",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "postgres",
+    "password": "1234",
+    "database": "p2plending",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "postgres",
+    "password": "1234",
+    "database": "p2plending",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}

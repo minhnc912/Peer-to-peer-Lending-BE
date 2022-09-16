@@ -1,0 +1,15 @@
+variables:
+  ZIP_FILE_NAME: "p2plending.zip"
+  S3_BUCKET_NAME: "p2p-be"
+stages:
+  - deploy
+deploy:
+  stage: deploy
+  image: python:latest
+  script:
+    - apt-get update
+    - apt-get install -y zip unzip
+    - zip -r $ZIP_FILE_NAME .
+    - ls 
+    - pip install -U awscli
+    - aws s3 --region us-east-1 cp $ZIP_FILE_NAME s3://$S3_BUCKET_NAME/
