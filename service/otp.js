@@ -31,7 +31,7 @@ module.exports = {
           throw new Error("your phone has verify")
        }
        const account_otp = await create_otp(user_id=user.id)
-       awsSNS.sendSms(user.phone_number, account_otp.code)
+       awsSNS.sendSms(user, account_otp.code)
        return account_otp.id;
     } catch (error) {
        throw new Error(error)
@@ -45,10 +45,10 @@ module.exports = {
           throw new Error("you must update phone number first")
        }
        const account_otp= await create_otp(user_id=null,invest_id=invest_id)
-       awsSNS.sendSms(user.phone_number, account_otp.code)
+       awsSNS.sendSms(user, account_otp.code)
        return account_otp.id;
     } catch (error) {
-       throw new Error("error when generate OTP")
+       throw new Error(error)
     }
  },
 
@@ -118,7 +118,7 @@ module.exports = {
        else {
           throw new Error("invalid OTP request")
        }
-       awsSNS.sendSms(user.phone_number, new_account_otp.code)
+       awsSNS.sendSms(user, new_account_otp.code)
        return new_account_otp.id
     } catch (error) {
        throw new Error(error.message)

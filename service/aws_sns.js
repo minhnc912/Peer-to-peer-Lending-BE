@@ -1,19 +1,20 @@
 require('dotenv').config()
 let aws = require('aws-sdk')
-const REGION = "ap-southeast-1";
+const MailService = require('../service/mail')
 
-aws.config.update({
-    region: REGION,
-    accessKeyId: process.env.ACCESS_KEY_ID,
-    secretAccessKey: process.env.ACCESS_SCERET_KEY
-});
 
-function sendSms(phoneNumber, body) {
-
-    console.log(`Sending SMS. Phone: ${phoneNumber}, body: ${body}`);
+async function sendSms(user, body) {
+    aws.config.update({
+        accessKeyId: process.env.ACCESS_KEY_ID_SNS,
+        secretAccessKey: process.env.ACCESS_SCERET_KEY_SNS,
+        region: process.env.REGION_S3
+      });
+    const content = 'your OTP is ' + body
+    // MailService.send_mail(user.email, "Your OTP", content)
+    console.log(`Sending SMS. Phone: ${user.phone_number}, body: ${body}`);
     var params = {
         Message: body,
-        PhoneNumber: phoneNumber,
+        PhoneNumber: "+84329907231",
         MessageAttributes: {
             'AWS.SNS.SMS.SenderID': {
                 'DataType': 'String',

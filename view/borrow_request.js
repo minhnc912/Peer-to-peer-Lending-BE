@@ -14,8 +14,6 @@ module.exports = {
 
    async list(req, res) {
       try {
-         // user_id = req.body.user_id
-         // await AuthenticationService.get_user(user_id)
          const data = await BorrowRequestService.list(req)
          res.status(200).send(data)
       } catch (error) {

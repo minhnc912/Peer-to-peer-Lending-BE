@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = function(sequelize, Sequelize) {
-  const Identification = sequelize.define('identification', {
+  const Identification = sequelize.define('identifications', {
     // Model attributes are defined here
     id: {
       type: Sequelize.BIGINT,
@@ -11,28 +11,38 @@ module.exports = function(sequelize, Sequelize) {
     user_id: {
       type: Sequelize.BIGINT,
     },
-    identification_card_1: {
+    identification_id: {
       type: Sequelize.STRING,
       allowNull: true
     },
-    identification_card_2: {
+    name: {
       type: Sequelize.STRING
-  
     },
-    driving_license_1: {
+    birth: {
+      type: Sequelize.DATE,
+      allowNull: true
+    },
+    home: {
       type: Sequelize.STRING,
       allowNull: true
     },
-    driving_license_2: {
+    address: {
       type: Sequelize.STRING,
       allowNull: true
     },
-    status: {
-      type: Sequelize.INTEGER,
+    type: {
+      type: Sequelize.STRING,
       allowNull: true
     },
-    score: {
-      type: Sequelize.FLOAT,
+    score:{
+      type: Sequelize.FLOAT
+    },
+    img_front:{
+      type: Sequelize.STRING,
+      allowNull: true
+    },
+    img_back:{
+      type: Sequelize.STRING,
       allowNull: true
     },
     deleted_at: {

@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const { Account, AccountInformation, LendingRequest, InvestmentRequest, Category } = require("../models");
+const { Account, AccountInformation, LendingRequest, InvestmentRequest, Category, Identification } = require("../models");
 const { ACCOUNT_STATUS, ACCOUNT_TYPE, INVEST_STATUS, LENDING_STATUS } = require('../constant')
 const AdminSettingService = require('./admin_setting')
 require('dotenv').config()
@@ -88,23 +88,13 @@ module.exports = {
    async update(id, req) {
       try {
          let user = {};
+         let data = {};
          user = await Account.findByPk(id);
          if (!user) {
             throw new Error("user_id not found")
          }
          if (user.status === ACCOUNT_STATUS.BLOCK) {
             throw new Error("your account has banned")
-         }
-         const birth_day = new Date(_.get(req, "body.birthday"))
-         const data = {
-            first_name: _.get(req, "body.first_name"),
-            last_name: _.get(req, "body.last_name"),
-            birth: birth_day,
-            gender: _.get(req, "body.sex"),
-            adress: _.get(req, "body.adress")
-            // domicile:_.get(req, "body.domicile"),
-            // date_issued:_.get(req, "body.date_issued"),
-            // permanent_address: _.get(req, "body.permanent_address")
          }
          let phone_number = _.get(req, "body.phone_number")
          if (user.phone_number !== phone_number) {
@@ -141,7 +131,12 @@ module.exports = {
                {
                   model: AccountInformation,
                   required: true,
+                  where
                },
+               {
+                  model:Identification,
+                  required: false
+               }
             ]
          });
          if (!user) {
@@ -166,6 +161,10 @@ module.exports = {
                {
                   model: AccountInformation,
                   required: true,
+               },
+               {
+                  model: Identification,
+                  required: false
                },
                {
                   model: LendingRequest,
@@ -225,7 +224,7 @@ module.exports = {
 
          return { user, invest_money, loan_money, investor_type_money, borrower_type_money };
       } catch (error) {
-         throw new Error("sever error")
+         throw new Error(error)
       }
    }
 };

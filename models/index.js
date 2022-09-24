@@ -48,10 +48,14 @@ const NotificationToken = require("./notification")(sequelize, Sequelize);
 const AdminSetting = require("./admin_setting")(sequelize, Sequelize);
 const AccountOTP = require("./account_otp")(sequelize, Sequelize);
 const AccountPayment = require("./account_payment")(sequelize, Sequelize);
+const WithdrawRequest = require("./withdraw_request")(sequelize, Sequelize);
 // Account
 Account.hasMany(AccountInformation,{ foreignKey: 'user_id' })
 Account.hasMany(LendingRequest,{ foreignKey: 'user_id' })
 Account.hasMany(InvestmentRequest,{ foreignKey: 'user_id' })
+Account.hasOne(Identification, {
+  foreignKey: 'user_id'
+})
 
 // AccountHistory
 AccountHistory.belongsTo(AccountInformation, {foreignKey: "account_id"});
@@ -64,6 +68,7 @@ AccountInformation.hasOne(CardInformation, {
   foreignKey: 'card_id'
 })
 AccountInformation.hasMany(AccountHistory,{ foreignKey: 'account_id' })
+AccountInformation.hasMany(WithdrawRequest,{ foreignKey: 'account_id' })
 
 // Identification
 Identification.belongsTo(Account, {
@@ -102,6 +107,11 @@ NotificationToken.belongsTo(Account, {
   foreignKey: 'user_id'
 });
 
+// WithdrawREquest
+WithdrawRequest.belongsTo(AccountInformation, {
+  foreignKey: 'account_id'
+});
+
 
 db.Account = Account
 db.AccountHistory = AccountHistory
@@ -117,4 +127,5 @@ db.NotificationToken = NotificationToken
 db.AdminSetting = AdminSetting
 db.AccountOTP = AccountOTP
 db.AccountPayment = AccountPayment
+db.WithdrawRequest = WithdrawRequest
 module.exports = db

@@ -1,5 +1,7 @@
 const AuthenticationService = require('../service/authentication')
 const OTPService = require('../service/otp.js')
+const MailService = require('../service/mail')
+const IdentificationService = require('../service/identification')
 const _ = require('lodash');
 module.exports = {
   async verify_phone_number(req, res) {
@@ -33,8 +35,8 @@ module.exports = {
 
  async test(req, res){
    try {
-      const response = await OTPService.testSMS(req)
-      res.status(200).send(response)
+       const data = await OTPService.testSMS(req)
+      res.status(200).send(data)
    } catch (error) {
       res.status(400).send(error.message)
    }

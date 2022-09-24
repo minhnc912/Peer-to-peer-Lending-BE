@@ -84,6 +84,10 @@ const LendingRequest = sequelize.define('lending_requests', {
     type: Sequelize.DATE,
     allowNull: true
   },
+  term: {
+    type: Sequelize.INTEGER,
+    allowNull: true
+  },
   deleted_at: {
     allowNull: true,
     type: Sequelize.DATE, 

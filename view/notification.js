@@ -2,9 +2,7 @@ const NotificationService = require('../service/notification.js')
 module.exports = {
   async list(req, res) {
     try {
-      const user_id = req.query.user_id
-      const type_account = req.query.type_account
-      const notifications = await NotificationService.get_notification(user_id, type_account)
+      const notifications = await NotificationService.get_notification(req)
       res.status(200).send(notifications)
     } catch (error) {
       res.status(400).send(error.message)

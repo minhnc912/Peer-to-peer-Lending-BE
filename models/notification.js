@@ -32,6 +32,10 @@ const Notification = sequelize.define('notifications', {
     type: Sequelize.INTEGER,
     allowNull: true,
   },
+  widthdraw_id:{
+    type: Sequelize.INTEGER,
+    allowNull: true,
+  },
   has_read: {
     type: Sequelize.BOOLEAN,
     allowNull: true,

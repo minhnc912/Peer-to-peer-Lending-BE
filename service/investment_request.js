@@ -83,7 +83,7 @@ const handle_after_create_success = async (user, Borrow_request, invest_request,
    }
    Borrow_request.total_payment =  total_payment_after
    const transaction_desc = "INVEST for borrow request id " + Borrow_request.id
-   const borrow_user = await AuthenticationService.get_user(Borrow_request.user_id)
+   const borrow_user = await AuthenticationService.get_user(Borrow_request.user_id, account_type=1)
    const account_history_data = {
       account_id: account_information.id,
       content: transaction_desc,
@@ -107,11 +107,11 @@ const handle_after_create_success = async (user, Borrow_request, invest_request,
       { transaction: t })
    if (Borrow_request.type_of_lending == LENDING_TYPE.BASIC){
       await AccountInformation.update({
-         balance: borrow_user.account_informations[1].balance + invest_request.amount
+         balance: borrow_user.account_informations[0].balance + invest_request.amount
       },
          {
             where: {
-               id: borrow_user.account_informations[1].id
+               id: borrow_user.account_informations[0].id
             }
          },
          { transaction: t })
@@ -191,7 +191,7 @@ module.exports = {
       try {
          const invest_request = await findById(invest_id)
          invest_request.status = INVEST_STATUS.CONFIRMED
-         const user = await AuthenticationService.get_user(invest_request.user_id)
+         const user = await AuthenticationService.get_user(invest_request.user_id, account_type = 2)
          const adminSettings = AdminSettingService.getAdminSetting()
          await handle_after_create_success(user, invest_request.lending_requests[0], invest_request, user.account_informations[0], adminSettings.min_invest_money, t)
          await invest_request.save({transaction:t})

@@ -236,7 +236,7 @@ const handle_rollback_money = async (borrow_request, from_payment=false) => {
                     user_id : borrow_request.user_id,
                     type_account : ACCOUNT_TYPE.BORROWER,
                     type_noti : NOTIFICATION_TYPE.BORROW_REQUEST,
-                    content: "your borrow request id " + borrow_request.id + "has been cancel success",
+                    content: "your borrow request id " + borrow_request.id + " has been cancel success",
                     borrow_id : borrow_request.id
                 },
             ]
@@ -249,7 +249,7 @@ const handle_rollback_money = async (borrow_request, from_payment=false) => {
             })
 
         }
-        borrower_user.limit_money += borrow_request.total_payment
+        borrower_user.limit_money += Math.ceil(borrow_request.expected_money * 0.3)
         await borrower_user.save({transaction:t})
         notification_data = notification_data.concat(notification_for_borrower)
         await NotificationService.bulk_create_notification(notification_data, t)
@@ -282,6 +282,7 @@ const validate_time = (lending_data) => {
     }
     lending_data.start_date = start_date
     lending_data.end_date = end_date
+    lending_data.term = end_date.diff(start_date, 'days')
 }
 
 const validate_money = (lending_data, user) => {
@@ -305,7 +306,7 @@ const validate_data = async (lending_data, user) => {
     }
 
     validate_time(lending_data);
-    await validate_admin_setting(lending_data.interest_rate)
+    await validate_admin_setting(lending_data.interest_rate, lending_data.expected_money)
     validate_money(lending_data, user.limit_money)
 }
 module.exports = {
@@ -315,6 +316,14 @@ module.exports = {
 
             if (![LENDING_TYPE.BASIC, LENDING_TYPE.MULTIPLE_INVESTER, LENDING_TYPE.MULTIPLE_MONEY].includes(type_of_lending)) {
                 throw new Error("invalid type of lending request")
+            }
+
+            if(!user.identification){
+                throw new Error("User must update identification card first")
+            }
+
+            if(!user.identification.img_back || user.identification.img_front){
+                throw new Error("User must update full identification card")
             }
 
             const interest_rate = _.get(data, "interest_rate")
@@ -359,22 +368,47 @@ module.exports = {
         }
     },
 
-    async list(data) {
-        const page =  _.get(data, "query.page", 1)
-        const limit =  _.get(data, "query.limit", 5)
+    async list(req) {
+        const page =  _.get(req, "query.page", 1)
+        const limit =  _.get(req, "query.limit", 5)
         const offset = (page -1) * limit
+        const contract_term = Number(_.get(req, "query.term", 0))
+        const limit_bottom = 10000000
+        const limit_top = 50000000
+        const user_id = req.user.id
+        let where = {}
+        where.can_invest = true
+        where.user_id = { [Op.not]: user_id}
+        if (contract_term > 0 ) {
+            where.term = {[Op.lt]: contract_term * 31}
+        }
+        if ( limit_bottom > 0 && limit_top > 0){
+            where.expected_money = {[Op.between]: [limit_bottom, limit_top]}
+        }
+        else if (limit_bottom > 0) {
+            where.expected_money = {[Op.gt]: limit_bottom}
+        }
+        else if (limit_top > 0) {
+            where.expected_money = {[Op.lt]: limit_top}
+        }
         try {
 
             const {count, rows}  = await LendingRequest.findAndCountAll({
-                where: {
-                    can_invest: true
-                },
+                where,
                 include: [
                     {
                         model: Category
                     },
                     {
                         model: Account
+                    },
+                    {
+                        model: InvestmentRequest,
+                        attributes:["user_id"],
+                        required:false,
+                        where:{
+                            status:INVEST_STATUS.CONFIRMED
+                        }
                     }
                 ],
                 order: [

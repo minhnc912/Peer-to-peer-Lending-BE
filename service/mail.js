@@ -25,7 +25,14 @@ module.exports = {
             subject: subject, 
             html: htmlContent 
           }
-        return transporter.sendMail(options)
+        transporter.sendMail(options,  function(err, info){
+          if (err){
+            throw new Error(err)
+          }
+          else{
+            return info
+          }
+        })
      } catch (error) {
          console.log(error)
      }

@@ -1,7 +1,7 @@
 require('dotenv').config()
 const _ = require('lodash');
 const { NOTIFICATION_TYPE, TRANSACTION_METHOD, TRANSACTION_STATUS, TRANSACTION_TYPE } = require('../constant');
-const { AccountPayment, AccountInformation, Account, Notification, AccountHistory} = require("../models");
+const { AccountPayment, AccountInformation, Account, Notification, AccountHistory, WithdrawRequest} = require("../models");
 const Utils = require('../sharing/Utils')
 const db = require("../models")
 const Sequelize = db.Sequelize;
@@ -38,7 +38,7 @@ module.exports = {
     var createDate = moment().format('yyyymmddHHmmss');
     var orderId = Utils.randomId();
     var amount = req.body.amount;
-    var bankCode = req.body.bankCode;
+    var bankCode = "";
     
     var orderInfo = 'helo';
     var orderType = "topup";
@@ -98,6 +98,7 @@ module.exports = {
     var signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex"); 
     vnp_Params['vnp_SecureHash'] = signed;
     vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
+    console.log(vnpUrl)
     return vnpUrl
      } catch (error) {
         throw new Error(error)
@@ -190,4 +191,64 @@ module.exports = {
         throw new Error("fail checksum")
     }
     },
+    async create_withdraw_request(req) {
+        const STATUS_PENDING = 1
+        try {
+        const user_id = _.get(req, "user.id")
+        if (!user_id){
+            throw new Error("invalid user_id")
+        }
+        const account_number = _.get(req, "body.account_number");
+        const bank_code = _.get(req, "body.bank_code")
+        const type_account = _.get(req, "body.type_account");
+        const amount = _.get(req, "body.amount");
+        const account_information = await AccountInformation.findOne({
+            where:{
+                user_id,
+                type:type_account
+            }
+        })
+        if (!account_information){
+            throw new Error("invalid user_id or user_type")
+        }
+        if (!account_number && bank_code && user_type && amount){
+            throw new Error("invalid params")
+        }
+        const data = {
+            account_number, bank_code, amount, status:STATUS_PENDING, account_id:account_information.id
+        }
+        const widthdraw_request = await WithdrawRequest.create(data)
+        const notification_data =  {
+            user_id : user_id,
+            type_account : user_type,
+            type_noti : NOTIFICATION_TYPE.WIDTHDRAW_REQUEST,
+            content: "your widthdraw request id " + widthdraw_request.id + " has been created, ưe will respond within 3 business days",
+            widthdraw_id : widthdraw_request.id
+        }
+        await Notification.create(notification_data)
+        return widthdraw_request
+        } catch (error) {
+            throw new Error(error)
+        }
+    },
+    async get_list_withdraw_request(req){
+        const user_id = _.get(req, "user.id")
+        const type_account = _.get(req, "query.type_account")
+        const data = await AccountInformation.findOne({
+            where:{
+                type:type_account,
+                user_id
+            },
+            include:[
+                {
+                    model: WithdrawRequest,
+                    required:false
+                }
+            ]
+        })
+        if (!data){
+            throw new Error("invalid user_id or type_account")
+        }
+        return data.withdraw_requests
+    }
  };

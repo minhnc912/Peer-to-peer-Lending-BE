@@ -1,6 +1,6 @@
 require('dotenv').config()
 const _ = require('lodash');
-const { Notification } = require("../models");
+const { Notification} = require("../models");
 const { NOTIFICATION_TYPE } = require('../constant');
 
 module.exports = {
@@ -24,9 +24,11 @@ module.exports = {
         }
        },
     
-    async get_notification(user_id, type_account) {
+    async get_notification(req) {
         try {
-          const notifications =  await Notification.findAll({
+            const user_id = req.query.user_id
+            const type_account = req.query.type_account
+          const notifications  = await Notification.findAll({
             where:{
                 user_id: user_id,
                 type_account:type_account
@@ -34,8 +36,8 @@ module.exports = {
             order: [
                 ['id','DESC']
             ],
-          })
-           return notifications
+        });
+           return notifications;
         } catch (error) {
             console.log(error)
         }
